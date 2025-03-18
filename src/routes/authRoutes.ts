@@ -1,32 +1,27 @@
+
+
 // import express from "express";
-// import { register, login } from "../controllers/authController";
+// import passport from "../config/passport";
+// import { register, login, googleAuthCallback } from "../controllers/authController";
 
 // const router = express.Router();
 
 // router.post("/register", register);
 // router.post("/login", login);
 
-// export default router;
-
-
-
-
-
-
-
-
-
-
-// // // authRoutes.ts
-// import express from "express";
-// import { register, login } from "../controllers/authController";
-
-// const router = express.Router();
-
-// router.post("/register", register);
-// router.post("/login", login);
+// // Google OAuth Routes
+// router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+// router.get(
+//   "/google/callback",
+//   passport.authenticate("google", { session: false }),
+//   googleAuthCallback
+// );
 
 // export default router;
+
+
+
+
 
 
 
@@ -41,26 +36,24 @@
 
 import express from "express";
 import passport from "../config/passport";
-import jwt from "jsonwebtoken";
+import { register, login, googleAuthCallback, logout } from "../controllers/authController";
+import { userInfo } from "../cookie/Cuser";
 
 const router = express.Router();
 
-// Google Login Route
-router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+router.post("/register", register);
+router.post("/login", login);
+router.post("/logout", logout);
 
-// Google Callback Route
+// Google OAuth Routes
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:3000/login" }),
-  (req, res) => {
-    if (!req.user) return res.status(401).json({ message: "Authentication failed" });
-
-    const token = jwt.sign({ id: (req.user as any).id }, process.env.JWT_SECRET || "secret", {
-      expiresIn: "1h",
-    });
-
-    res.redirect(`http://localhost:3000/dashboard?token=${token}`);
-  }
+  passport.authenticate("google", { session: false }),
+  googleAuthCallback
 );
 
+router.get('/userInfo',userInfo)
+
 export default router;
+
